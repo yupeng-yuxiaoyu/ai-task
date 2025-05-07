@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import request from '../utils/request'
 
 const imageUrl = ref('')
+const audioUrl = ref('')  // 新增音频链接输入
+const taskId = ref('')  // 新增taskId输入
 const loading = ref(false)
 const result = ref(null)
 const error = ref(null)
@@ -10,6 +12,10 @@ const error = ref(null)
 const handleSubmit = async () => {
   if (!imageUrl.value) {
     error.value = '请输入图片URL'
+    return
+  }
+  if (!audioUrl.value) {
+    error.value = '请输入音频URL'
     return
   }
 
@@ -23,7 +29,8 @@ const handleSubmit = async () => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        imageUrl: imageUrl.value
+        imageUrl: imageUrl.value,
+        audioUrl: audioUrl.value
       })
     })
     
@@ -39,11 +46,42 @@ const handleSubmit = async () => {
     loading.value = false
   }
 }
+
+// 新增查询任务状态的方法
+const queryTaskStatus = async () => {
+  if (!taskId.value) {
+    error.value = '请输入任务ID'
+    return
+  }
+
+  loading.value = true
+  error.value = null
+  
+  try {
+    const response = await fetch(`http://localhost:3000/api/task-status/${taskId.value}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    
+    if (!response.ok) {
+      throw new Error('请求失败')
+    }
+    
+    const data = await response.json()
+    result.value = data
+  } catch (err) {
+    error.value = '查询失败：' + err.message
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
   <div class="image-detect">
-    <h1>人脸检测</h1>
+    <h1>人脸检测与视频合成</h1>
     
     <div class="form">
       <div class="form-item">
@@ -55,12 +93,41 @@ const handleSubmit = async () => {
         >
       </div>
       
+      <div class="form-item">
+        <label>音频URL：</label>
+        <input 
+          type="text" 
+          v-model="audioUrl" 
+          placeholder="请输入音频URL"
+        >
+      </div>
+      
       <button 
         @click="handleSubmit" 
         :disabled="loading"
       >
         {{ loading ? '处理中...' : '提交' }}
       </button>
+      
+      <!-- 新增任务状态查询表单 -->
+      <div class="task-query">
+        <h2>查询任务状态</h2>
+        <div class="form-item">
+          <label>任务ID：</label>
+          <input 
+            type="text" 
+            v-model="taskId" 
+            placeholder="请输入任务ID"
+          >
+        </div>
+        
+        <button 
+          @click="queryTaskStatus" 
+          :disabled="loading"
+        >
+          {{ loading ? '查询中...' : '查询状态' }}
+        </button>
+      </div>
     </div>
 
     <div v-if="error" class="error">
@@ -124,5 +191,11 @@ button:disabled {
   padding: 15px;
   background-color: #f5f5f5;
   border-radius: 4px;
+}
+
+.task-query {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #ddd;
 }
 </style>

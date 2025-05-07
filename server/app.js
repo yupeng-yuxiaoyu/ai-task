@@ -60,66 +60,46 @@ router.post('/api/face-detect', async (ctx) => {
     try {
         const { imageUrl, audioUrl } = ctx.request.body;
 
-        // if (!imageUrl) {
-        //     logger.warn({
-        //         message: '请求缺少图片URL',
-        //         body: ctx.request.body
-        //     });
-        //     ctx.status = 400;
-        //     ctx.body = { error: '请提供图片URL' };
-        //     return;
-        // }
+        if (!imageUrl) {
+            logger.warn({
+                message: '请求缺少图片URL',
+                body: ctx.request.body
+            });
+            ctx.status = 400;
+            ctx.body = { error: '请提供图片URL' };
+            return;
+        }
 
-        // logger.info({
-        //     message: '开始处理图片检测请求',
-        //     imageUrl: imageUrl
-        // });
+        logger.info({
+            message: '开始处理图片检测请求',
+            imageUrl: imageUrl
+        });
 
-        // const response = await aliyunClient.post('/services/aigc/image2video/face-detect', {
-        //     model: 'emo-detect-v1',
-        //     input: {
-        //         image_url: imageUrl
-        //     },
-        //     parameters: {
-        //         ratio: '1:1'
-        //     }
-        // });
-        // logger.info({
-        //     message: '图片检测请求成功',
-        //     imageUrl: imageUrl,
-        //     responseStatus: response.status,
-        //     data: response.data
-        // });
-
-        // 模拟的人脸检测响应
-        const faceDetectResponse = {
-            "output": {
-                "check_pass": true,
-                "humanoid": true,
-                "face_bbox": [
-                    618,
-                    394,
-                    1078,
-                    854
-                ],
-                "ext_bbox": [
-                    293,
-                    0,
-                    1403,
-                    1110
-                ]
+        const faceDetectResponse = await aliyunClient.post('/services/aigc/image2video/face-detect', {
+            model: 'emo-detect-v1',
+            input: {
+                image_url: imageUrl
             },
-            "usage": {
-                "image_count": 1
-            },
-            "request_id": "f1250392-8904-996e-81ce-f9fb16e3f3df"
-        };
+            parameters: {
+                ratio: '1:1'
+            }
+        });
+
+        logger.info({
+            message: '图片检测请求成功',
+            imageUrl: imageUrl,
+            responseStatus: faceDetectResponse.status,
+            data: faceDetectResponse.data
+        });
+
+        // 只记录响应数据，避免循环引用问题
+        console.log('人脸检测响应数据 >> ', JSON.stringify(faceDetectResponse.data));
 
         // 如果人脸检测通过，继续请求视频合成
-        if (faceDetectResponse.output.check_pass) {
+        if (faceDetectResponse.data.output.check_pass) {
             logger.info({
                 message: '人脸检测通过，开始视频合成',
-                faceDetectResult: faceDetectResponse
+                faceDetectResult: faceDetectResponse.data
             });
 
             const videoSynthesisResponse = await aliyunClient.post('/services/aigc/image2video/video-synthesis/', {
@@ -127,8 +107,8 @@ router.post('/api/face-detect', async (ctx) => {
                 input: {
                     image_url: imageUrl,
                     audio_url: audioUrl,
-                    face_bbox: faceDetectResponse.output.face_bbox,
-                    ext_bbox: faceDetectResponse.output.ext_bbox
+                    face_bbox: faceDetectResponse.data.output.face_bbox,
+                    ext_bbox: faceDetectResponse.data.output.ext_bbox
                 },
                 parameters: {
                     style_level: "normal"
@@ -145,16 +125,18 @@ router.post('/api/face-detect', async (ctx) => {
             });
 
             ctx.body = {
-                faceDetect: faceDetectResponse,
+                faceDetect: faceDetectResponse.data,
                 videoSynthesis: videoSynthesisResponse.data
             };
         } else {
             ctx.body = {
-                faceDetect: faceDetectResponse,
+                faceDetect: faceDetectResponse.data,
                 error: '人脸检测未通过'
             };
         }
     } catch (error) {
+        const { imageUrl, audioUrl } = ctx.request.body;
+
         logger.error({
             message: '请求处理失败',
             imageUrl: imageUrl,

@@ -9,8 +9,7 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(
     config => {
-        // 在这里可以添加统一的请求头
-        config.headers['Authorization'] = `Bearer ${import.meta.env.VITE_API_KEY}`
+        // config.headers['Authorization'] = `Bearer ${import.meta.env.VITE_API_KEY}`
 
         return config
     },

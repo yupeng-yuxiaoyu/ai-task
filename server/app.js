@@ -93,12 +93,12 @@ router.post('/api/face-detect', async (ctx) => {
         });
 
         // 只记录响应数据，避免循环引用问题
-        console.log('人脸检测响应数据 >> ', JSON.stringify(faceDetectResponse.data));
+        console.log('人物唱歌响应数据 >> ', JSON.stringify(faceDetectResponse.data));
 
-        // 如果人脸检测通过，继续请求视频合成
+        // 如果人物唱歌通过，继续请求视频合成
         if (faceDetectResponse.data.output.check_pass) {
             logger.info({
-                message: '人脸检测通过，开始视频合成',
+                message: '人物唱歌通过，开始视频合成',
                 faceDetectResult: faceDetectResponse.data
             });
 
@@ -131,7 +131,7 @@ router.post('/api/face-detect', async (ctx) => {
         } else {
             ctx.body = {
                 faceDetect: faceDetectResponse.data,
-                error: '人脸检测未通过'
+                error: '人物唱歌未通过'
             };
         }
     } catch (error) {
@@ -186,6 +186,97 @@ router.get('/api/task-status/:taskId', async (ctx) => {
         logger.error({
             message: '任务状态查询失败',
             taskId: taskId,
+            error: error.message,
+            stack: error.stack
+        });
+
+        ctx.status = error.response?.status || 500;
+        ctx.body = {
+            error: error.response?.data?.message || '服务器内部错误'
+        };
+    }
+});
+
+// 音频复刻接口
+router.post('/api/voice-clone', async (ctx) => {
+    try {
+        const { audioUrl } = ctx.request.body;
+
+        if (!audioUrl) {
+            logger.warn({
+                message: '请求缺少音频URL',
+                body: ctx.request.body
+            });
+            ctx.status = 400;
+            ctx.body = { error: '请提供音频URL' };
+            return;
+        }
+
+        logger.info({
+            message: '开始处理音频复刻请求',
+            audioUrl: audioUrl
+        });
+
+        const response = await aliyunClient.post('/services/audio/tts/customization', {
+            model: "voice-enrollment",
+            input: {
+                action: "create_voice",
+                target_model: "cosyvoice-v2",
+                prefix: "yuxiaoyu",
+                url: audioUrl
+            }
+        });
+
+        logger.info({
+            message: '音频复刻请求成功',
+            audioUrl: audioUrl,
+            responseStatus: response.status,
+            data: response.data
+        });
+
+        ctx.body = response.data;
+    } catch (error) {
+        logger.error({
+            message: '音频复刻请求失败',
+            audioUrl: ctx.request.body.audioUrl,
+            error: error.message,
+            stack: error.stack
+        });
+
+        ctx.status = error.response?.status || 500;
+        ctx.body = {
+            error: error.response?.data?.message || '服务器内部错误'
+        };
+    }
+});
+
+// 查询音频列表接口
+router.get('/api/voice-list', async (ctx) => {
+    try {
+        logger.info({
+            message: '开始查询音频列表'
+        });
+
+        const response = await aliyunClient.post('/services/audio/tts/customization', {
+            model: "voice-enrollment",
+            input: {
+                action: "list_voice",
+                prefix: "yuxiaoyu",
+                page_index: 0,
+                page_size: 100
+            }
+        });
+
+        logger.info({
+            message: '音频列表查询成功',
+            responseStatus: response.status,
+            data: response.data
+        });
+
+        ctx.body = response.data;
+    } catch (error) {
+        logger.error({
+            message: '音频列表查询失败',
             error: error.message,
             stack: error.stack
         });

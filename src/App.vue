@@ -1,81 +1,121 @@
 <script setup>
 import { RouterLink, RouterView } from "vue-router";
-import HelloWorld from "./components/HelloWorld.vue";
+import { ref } from "vue";
+import { Popup } from "vant";
+import "vant/lib/index.css";
+
+const showPopup = ref(false);
+
+const handleNavClick = () => {
+  showPopup.value = false;
+};
 </script>
 
 <template>
   <header>
     <div class="wrapper">
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/image-detect">人脸检测</RouterLink>
-      </nav>
+      <div class="nav-icon" @click="showPopup = true">
+        <i class="menu-icon"></i>
+      </div>
     </div>
   </header>
 
-  <RouterView />
+  <Popup
+    v-model:show="showPopup"
+    position="left"
+    :style="{ width: '60%', height: '100%' }"
+  >
+    <div class="popup-content">
+      <nav>
+        <RouterLink to="/" @click="handleNavClick">首页</RouterLink>
+        <RouterLink to="/image-detect" @click="handleNavClick"
+          >人物唱歌</RouterLink
+        >
+        <RouterLink to="/voice-clone" @click="handleNavClick"
+          >音频复刻</RouterLink
+        >
+      </nav>
+    </div>
+  </Popup>
+
+  <div class="content-container">
+    <RouterView />
+  </div>
 </template>
 
 <style scoped>
 header {
   line-height: 1.5;
   max-height: 100vh;
+  padding: 1rem;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.menu-icon {
+  position: relative;
+  width: 20px;
+  height: 2px;
+  background-color: #333;
+}
+
+.menu-icon::before,
+.menu-icon::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 2px;
+  background-color: #333;
+  transition: all 0.3s ease;
+}
+
+.menu-icon::before {
+  top: -6px;
+}
+
+.menu-icon::after {
+  top: 6px;
+}
+
+.popup-content {
+  padding: 20px;
 }
 
 nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+  display: block;
+  padding: 10px;
+  color: #333;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: all 0.3s ease;
 }
 
-nav a:first-of-type {
-  border: 0;
+nav a:hover {
+  background-color: #f5f5f5;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+nav a.router-link-active {
+  color: #4caf50;
+  background-color: #e8f5e9;
 }
 </style>

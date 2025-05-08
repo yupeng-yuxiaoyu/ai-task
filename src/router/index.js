@@ -38,6 +38,15 @@ const routes = [
       title: '文本转语音TTS',
       icon: '🔊'
     }
+  },
+  {
+    path: '/voice-clone-tts',
+    name: 'voice-clone-tts',
+    component: () => import('../views/VoiceCloneTTSView.vue'),
+    meta: {
+      title: '语音复刻转语音',
+      icon: '🗣️'
+    }
   }
 ]
 

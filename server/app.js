@@ -4,6 +4,10 @@ const bodyParser = require('koa-bodyparser');
 const cors = require('@koa/cors');
 const axios = require('axios');
 const logger = require('./logger');
+const http = require('http');
+const path = require('path');
+const serve = require('koa-static');
+const createWebSocketServer = require('./ws');
 require('dotenv').config();
 
 const app = new Koa();
@@ -340,7 +344,13 @@ router.post('/api/text-to-speech', async (ctx) => {
 
 app.use(router.routes()).use(router.allowedMethods());
 
+// 配置静态资源中间件
+app.use(serve(path.join(__dirname, 'public')));
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const server = http.createServer(app.callback());
+createWebSocketServer(server);
+
+server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

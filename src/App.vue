@@ -37,6 +37,9 @@ const handleNavClick = () => {
         <RouterLink to="/text-to-speech" @click="handleNavClick">
           文本转语音TTS</RouterLink
         >
+        <RouterLink to="/voice-clone-tts" @click="handleNavClick">
+          语音复刻转语音</RouterLink
+        >
       </nav>
     </div>
   </Popup>

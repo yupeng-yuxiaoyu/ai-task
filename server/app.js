@@ -20,7 +20,7 @@ app.use(bodyParser());
 // 创建阿里云请求实例
 const aliyunClient = axios.create({
     baseURL: 'https://dashscope.aliyuncs.com/api/v1',
-    timeout: 10000,
+    timeout: 30000,  // 将超时时间改为30秒
     headers: {
         'Authorization': `Bearer ${process.env.API_KEY}`,
         'Content-Type': 'application/json'

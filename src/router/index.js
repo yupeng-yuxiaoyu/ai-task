@@ -29,6 +29,15 @@ const routes = [
       title: '音频复刻',
       icon: '🎵'
     }
+  },
+  {
+    path: '/text-to-speech',
+    name: 'text-to-speech',
+    component: () => import('../views/TextToSpeechView.vue'),
+    meta: {
+      title: '文本转语音',
+      icon: '🔊'
+    }
   }
 ]
 

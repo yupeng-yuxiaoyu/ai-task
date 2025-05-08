@@ -288,6 +288,56 @@ router.get('/api/voice-list', async (ctx) => {
     }
 });
 
+// 文本转语音接口
+router.post('/api/text-to-speech', async (ctx) => {
+    try {
+        const { text } = ctx.request.body;
+
+        if (!text) {
+            logger.warn({
+                message: '请求缺少文本内容',
+                body: ctx.request.body
+            });
+            ctx.status = 400;
+            ctx.body = { error: '请提供文本内容' };
+            return;
+        }
+
+        logger.info({
+            message: '开始处理文本转语音请求',
+            text: text
+        });
+
+        const response = await aliyunClient.post('/services/aigc/multimodal-generation/generation', {
+            model: "qwen-tts",
+            input: {
+                text: text,
+                voice: "Chelsie"
+            }
+        });
+
+        logger.info({
+            message: '文本转语音请求成功',
+            responseStatus: response.status,
+            data: response.data
+        });
+
+        ctx.body = response.data;
+    } catch (error) {
+        logger.error({
+            message: '文本转语音请求失败',
+            text: ctx.request.body.text,
+            error: error.message,
+            stack: error.stack
+        });
+
+        ctx.status = error.response?.status || 500;
+        ctx.body = {
+            error: error.response?.data?.message || '服务器内部错误'
+        };
+    }
+});
+
 app.use(router.routes()).use(router.allowedMethods());
 
 const PORT = process.env.PORT || 3000;

@@ -1,8 +1,15 @@
 <script setup>
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
+const routes = ref([]);
 const router = useRouter();
-const routes = router.options.routes.filter(route => !route.meta?.hideInMenu);
+
+onMounted(() => {
+  routes.value = router.options.routes.filter(
+    (route) => !route.meta?.hideInMenu
+  );
+});
 
 const navigateTo = (path) => {
   router.push(path);

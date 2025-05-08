@@ -35,7 +35,7 @@ const routes = [
     name: 'text-to-speech',
     component: () => import('../views/TextToSpeechView.vue'),
     meta: {
-      title: '文本转语音',
+      title: '文本转语音TTS',
       icon: '🔊'
     }
   }

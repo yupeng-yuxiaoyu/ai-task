@@ -35,7 +35,7 @@ const handleNavClick = () => {
           >音频复刻</RouterLink
         >
         <RouterLink to="/text-to-speech" @click="handleNavClick">
-          文本转语音</RouterLink
+          文本转语音TTS</RouterLink
         >
       </nav>
     </div>

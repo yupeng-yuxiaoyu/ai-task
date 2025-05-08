@@ -65,7 +65,7 @@ const handleSubmit = async () => {
     if (data.output?.audio) {
       saveAudioInfo({
         id: data.output.audio.id,
-        url: data.output.audio.url
+        url: data.output.audio.url,
       });
       currentAudio.value = data.output.audio.url;
       showToast("转换成功");
@@ -80,7 +80,7 @@ const handleSubmit = async () => {
 
 <template>
   <div class="text-to-speech">
-    <h1>文本转语音</h1>
+    <h1>文本转语音TTS</h1>
 
     <div class="form">
       <div class="form-item">

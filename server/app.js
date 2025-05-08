@@ -288,7 +288,7 @@ router.get('/api/voice-list', async (ctx) => {
     }
 });
 
-// 文本转语音接口
+// 文本转语音TTS接口
 router.post('/api/text-to-speech', async (ctx) => {
     try {
         const { text } = ctx.request.body;
@@ -304,7 +304,7 @@ router.post('/api/text-to-speech', async (ctx) => {
         }
 
         logger.info({
-            message: '开始处理文本转语音请求',
+            message: '开始处理文本转语音TTS请求',
             text: text
         });
 
@@ -317,7 +317,7 @@ router.post('/api/text-to-speech', async (ctx) => {
         });
 
         logger.info({
-            message: '文本转语音请求成功',
+            message: '文本转语音TTS请求成功',
             responseStatus: response.status,
             data: response.data
         });
@@ -325,7 +325,7 @@ router.post('/api/text-to-speech', async (ctx) => {
         ctx.body = response.data;
     } catch (error) {
         logger.error({
-            message: '文本转语音请求失败',
+            message: '文本转语音TTS请求失败',
             text: ctx.request.body.text,
             error: error.message,
             stack: error.stack

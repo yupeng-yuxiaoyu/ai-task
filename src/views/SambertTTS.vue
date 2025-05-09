@@ -3,7 +3,6 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { showToast } from "vant";
 
 const text = ref("");
-const voiceId = ref("");
 const loading = ref(false);
 const error = ref(null);
 const audioUrl = ref("");
@@ -17,12 +16,11 @@ const connectWebSocket = () => {
     console.log("WebSocket连接已建立");
   };
 
-  // 修改WebSocket消息处理
+  // WebSocket消息处理
   ws.value.onmessage = (event) => {
     const message = JSON.parse(event.data);
 
-    if (message.type === "cosyvoice_audio") {
-      // 收到音频URL
+    if (message.type === "sambert_audio") {  // 使用不同的消息类型
       audioUrl.value = message.url;
       // 保存到本地存储
       saveAudioInfo({
@@ -50,8 +48,8 @@ const connectWebSocket = () => {
 
 // 发送转换请求
 const handleSubmit = () => {
-  if (!text.value || !voiceId.value) {
-    error.value = "请输入文本和语音ID";
+  if (!text.value) {
+    error.value = "请输入要转换的文本";
     return;
   }
 
@@ -65,9 +63,8 @@ const handleSubmit = () => {
 
   ws.value.send(
     JSON.stringify({
-      type: "cosyvoice", // 添加消息类型以区分不同的TTS服务
-      text: text.value,
-      voiceId: voiceId.value,
+      type: "sambert",  // 添加消息类型以区分不同的TTS服务
+      text: text.value
     })
   );
 };
@@ -85,8 +82,8 @@ onUnmounted(() => {
 const audioList = ref([]);
 const currentAudio = ref("");
 
-// 获取当前路由作为存储前缀
-const storageKey = "voice_clone_tts_audio_list";
+// 存储前缀
+const storageKey = "sambert_tts_audio_list";
 
 // 从localStorage加载音频列表
 const loadAudioList = () => {
@@ -98,7 +95,6 @@ const loadAudioList = () => {
 
 // 保存音频信息到列表
 const saveAudioInfo = (audioInfo) => {
-  // 从url中提取id
   const urlParts = audioInfo.url.split("/");
   const fileName = urlParts[urlParts.length - 1];
   const id = fileName.split(".")[0];
@@ -107,7 +103,6 @@ const saveAudioInfo = (audioInfo) => {
     id: id,
     url: audioInfo.url,
     text: text.value,
-    voiceId: voiceId.value,
     timestamp: new Date().toLocaleString(),
   });
   localStorage.setItem(storageKey, JSON.stringify(audioList.value));
@@ -117,7 +112,6 @@ const saveAudioInfo = (audioInfo) => {
 const switchAudio = (audio) => {
   audioUrl.value = audio.url;
   text.value = audio.text;
-  voiceId.value = audio.voiceId;
 };
 
 // 页面加载时读取本地存储的音频列表
@@ -127,8 +121,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="voice-clone-tts">
-    <h1>语音复刻转语音</h1>
+  <div class="sambert-tts">
+    <h1>Sambert文本转语音</h1>
 
     <div class="form">
       <div class="form-item">
@@ -138,11 +132,6 @@ onMounted(() => {
           placeholder="请输入要转换的文本"
           rows="4"
         ></textarea>
-      </div>
-
-      <div class="form-item">
-        <label>语音ID：</label>
-        <input type="text" v-model="voiceId" placeholder="请输入复刻音频ID" />
       </div>
 
       <button @click="handleSubmit" :disabled="loading">
@@ -172,7 +161,6 @@ onMounted(() => {
           <div class="audio-info">
             <div class="audio-text">{{ audio.text }}</div>
             <div class="audio-meta">
-              <span class="voice-id">音色ID: {{ audio.voiceId }}</span>
               <span class="timestamp">{{ audio.timestamp }}</span>
             </div>
           </div>
@@ -184,7 +172,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.voice-clone-tts {
+.sambert-tts {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;

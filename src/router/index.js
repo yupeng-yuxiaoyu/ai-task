@@ -47,6 +47,15 @@ const routes = [
       title: '语音复刻转语音',
       icon: '🗣️'
     }
+  },
+  {
+    path: '/sambert-tts',
+    name: 'sambert-tts',
+    component: () => import('../views/SambertTTS.vue'),
+    meta: {
+      title: 'Sambert文本转语音',
+      icon: '🔊'
+    }
   }
 ]
 

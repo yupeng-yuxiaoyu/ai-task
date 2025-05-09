@@ -1,4 +1,5 @@
 <script setup>
+import { onMounted, onUnmounted } from "vue";
 import { RouterLink, RouterView } from "vue-router";
 import { ref } from "vue";
 import { Popup } from "vant";
@@ -9,10 +10,25 @@ const showPopup = ref(false);
 const handleNavClick = () => {
   showPopup.value = false;
 };
+
+const isSticky = ref(false);
+
+// 添加滚动监听
+onMounted(() => {
+  window.addEventListener("scroll", handleScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("scroll", handleScroll);
+});
+
+const handleScroll = () => {
+  isSticky.value = window.scrollY > 0;
+};
 </script>
 
 <template>
-  <header>
+  <header :class="{ sticky: isSticky }">
     <div class="wrapper">
       <div class="nav-icon" @click="showPopup = true">
         <i class="menu-icon"></i>
@@ -40,6 +56,9 @@ const handleNavClick = () => {
         <RouterLink to="/voice-clone-tts" @click="handleNavClick">
           语音复刻转语音</RouterLink
         >
+        <RouterLink to="/sambert-tts" @click="handleNavClick">
+          Sambert文本转语音</RouterLink
+        >
       </nav>
     </div>
   </Popup>
@@ -56,6 +75,15 @@ header {
   padding: 1rem;
   background-color: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+
+header.sticky {
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 }
 
 .wrapper {
